@@ -128,7 +128,7 @@ export const BUY_TICKET = async (req, res) => {
 
 // =================================================================================================================
 
-// Get users with their bought tickets  == aggregation
+// Get users that have bought tickets  == aggregation
 export const GET_ALL_USERS_WITH_TICKETS = async (req, res) => {
   try {
     const users = await User.aggregate([
