@@ -10,12 +10,15 @@ dotenv.config();
 
 const app = express();
 
+// middleware to parse JSON bodies
 app.use(express.json());
 
+// Register route handlers for different endpoints
 app.use("/tickets", ticketRoutes);
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
 
+// connection to mongoDB from a string in .env file
 mongoose
   .connect(process.env.MONGO_URI)
   .then(console.log("Connected to MongoDB"))

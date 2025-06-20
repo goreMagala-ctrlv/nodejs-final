@@ -9,6 +9,7 @@ import { validateRequest } from "../middlewares/validationMiddleware.js";
 
 const router = express.Router();
 
+// route for registering a new user and validation for email, name and password before calling the controller
 router.post(
   "/registerUser",
   [
@@ -26,6 +27,8 @@ router.post(
   registerUser
 );
 
+// route for user login
+// validation for email and password
 router.post(
   "/userLogin",
   [
@@ -36,6 +39,7 @@ router.post(
   loginUser
 );
 
+// route for refreshing jwt token, dont need validation here because it is called after login
 router.post("/refreshJwtToken", refreshJwtToken);
 
 export default router;

@@ -6,6 +6,7 @@ import { validateRequest } from "../middlewares/validationMiddleware.js";
 
 const router = express.Router();
 
+// Add a new ticket, validates all required fields before adding the ticket
 router.post(
   "/addTicket",
   auth,

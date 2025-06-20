@@ -1,5 +1,6 @@
 import Ticket from "../models/Ticket.js";
 
+// Insert new ticket in the database
 export const insertTicket = async (req, res) => {
   try {
     const {
@@ -10,6 +11,7 @@ export const insertTicket = async (req, res) => {
       to_location_photo_url,
     } = req.body;
 
+    // Create a new ticket object
     const newTicket = new Ticket({
       title,
       ticket_price,
