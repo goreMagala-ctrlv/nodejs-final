@@ -80,7 +80,9 @@ export const loginUser = async (req, res) => {
     // Check if password matches
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
-      return res.status(401).json({ message: "Wrong email or password" });
+      return res
+        .status(401)
+        .json({ message: "Email or password does not match" });
 
     // Generate tokens
     // jwt_token 2 hours expiration
