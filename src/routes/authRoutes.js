@@ -18,6 +18,7 @@ router.post(
     body("password")
       .isLength({ min: 6 })
       .withMessage("Password must have 6 or more characters")
+      // Regex for password validation to include one uppercase letter, one lowercase and one number
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/, "i")
       .withMessage(
         "Password must have at least one uppercase letter, one lowercase letter, and one number"

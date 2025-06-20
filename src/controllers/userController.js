@@ -24,9 +24,16 @@ export const GET_USER_BY_ID = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Checks if the id is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id))
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(401).json({ message: "Invalid user ID" });
+    }
+
+    const user = await User.findById(id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     res.status(200).json(user);
   } catch (err) {
@@ -34,6 +41,46 @@ export const GET_USER_BY_ID = async (req, res) => {
     res
       .status(500)
       .json({ message: "Something went wrong while fetching user" });
+  }
+};
+
+// =================================================================================================================
+
+// Update user by ID
+export const UPDATE_USER_BY_ID = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(401).json({ message: "Invalid user ID" });
+    }
+
+    // prevents updating password and tickets
+    delete updates.password;
+    delete updates.bought_tickets;
+
+    // Find user by ID and update with new data
+    const updatedUser = await User.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+      select: "-password",
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "User updated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json({ message: "Something went wrong while updating user" });
   }
 };
 
@@ -85,6 +132,7 @@ export const BUY_TICKET = async (req, res) => {
 export const GET_ALL_USERS_WITH_TICKETS = async (req, res) => {
   try {
     const users = await User.aggregate([
+      { $match: { bought_tickets: { $exists: true, $ne: [] } } },
       {
         $lookup: {
           from: "tickets",
@@ -93,7 +141,7 @@ export const GET_ALL_USERS_WITH_TICKETS = async (req, res) => {
           as: "tickets",
         },
       },
-      { $project: { password: 0 } }, // excludes passwords
+      { $project: { password: 0, bought_tickets: 0 } }, // excludes passwords
       { $sort: { name: 1 } },
     ]);
     res.status(200).json(users);
@@ -111,11 +159,15 @@ export const GET_ALL_USERS_WITH_TICKETS = async (req, res) => {
 export const GET_USER_BY_ID_WITH_TICKETS = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id))
-      return res.status(401).json({ message: "Invalid user ID" });
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const objectId = new mongoose.mongo.ObjectId(id);
 
     const user = await User.aggregate([
-      { $match: { _id: mongoose.Types.ObjectId(id) } },
+      { $match: { _id: objectId } },
       {
         $lookup: {
           from: "tickets",
@@ -125,12 +177,15 @@ export const GET_USER_BY_ID_WITH_TICKETS = async (req, res) => {
         },
       },
       { $project: { password: 0 } },
-    ]);
-    if (!user.length)
+    ]).exec();
+
+    if (!user.length) {
       return res.status(404).json({ message: "User does not exist" });
+    }
+
     res.status(200).json(user[0]);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).json({
       message: "Something went wrong while fetching user with tickets",
     });
