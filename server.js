@@ -1,9 +1,9 @@
-import main from "./main.js";
+import app from "./app.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-main.listen(PORT, () => {
-  console.log(
-    `%cServer is running on port ${PORT}` + PORT,
-    "color: blue; font-weight: bold;"
-  );
-});
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
